@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/purecss@2.0.5/build/pure-min.css"
+      integrity="sha384-LTIDeidl25h2dPxrB2Ekgc9c7sEC3CWGM6HeFmuDNUjX76Ert4Z4IY714dhZHPLd"
+      crossorigin="anonymous"
+    />
+    <title>Formulario</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="pure-form pure-form-stacked" style="margin-top: 50px">
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" placeholder="Nombre" />
+        <label for="edad">Edad</label>
+        <input type="number" id="edad" placeholder="Edad" />
+        <label for="sexo">Sexo</label>
+        <select id="sexo">
+          <option>Hombre</option>
+          <option>Mujer</option>
+        </select>
+        <label for="peso">Peso</label>
+        <input type="number" id="peso" placeholder="Peso" />
+        <label for="altura">Altura</label>
+        <input type="number" id="altura" placeholder="Altura" />
+        <button
+          type="submit"
+          class="pure-button pure-button-primary"
+          onclick="getData()"
+        >
+          Enviar
+        </button>
+      </div>
+    </div>
+    <div class="container" id="showResults">
+      <div class="pure-menu custom-restricted-width">
+        <h3>Resultados</h3>
+        <h4 style="margin-bottom: 0px;">Información</h4>
+        <ul id="resultado" class="pure-menu-list"></ul>
+      </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="person2.js"></script>
+    <script>
+      $("#showResults").hide();
+      function getData() {
+        $("#showResults").show();
+        var nombre = $("#nombre").val();
+        var edad = $("#edad").val();
+        var sexo = $("#sexo").val();
+        var peso = $("#peso").val();
+        var altura = $("#altura").val();
+        var persona = new Persona(nombre, edad, sexo, peso, altura);
+        var imc = persona.calcularIMC();
+        var imcResult;
+        console.log(persona);
+
+        if (imc === 1) {
+          imcResult = "Sobrepeso";
+        } else if (imc === 2) {
+          imcResult = "Falta de peso";
+        } else {
+          imcResult = "Peso normal";
+        }
+
+        $("#resultado").html(`
+        <li class="pure-menu-item">Nombre: ${nombre}</li>
+        <li class="pure-menu-item">Edad: ${edad}</li>
+        <li class="pure-menu-item">Sexo: ${sexo}</li>
+        <li class="pure-menu-item">Peso: ${peso}</li>
+        <li class="pure-menu-item">Altura: ${altura}</li>
+        <li class="pure-menu-item">${imcResult}</li>
+        <li class="pure-menu-item">Mayor de edad: ${
+          persona.esMayorDeEdad() ? "✔️" : "❌"
+        }</li>
+                `);
+      }
+    </script>
+  </body>
+</html>
