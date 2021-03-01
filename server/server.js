@@ -4,6 +4,8 @@ var fs = require("fs");
 var https = require("https");
 var mysql = require("mysql");
 var bodyParser = require("body-parser");
+var cors = require("cors");
+var moment = require("moment");
 
 const PORT = process.env.PORT || 3050;
 
@@ -21,6 +23,11 @@ connection.connect((err) => {
 });
 
 app.use(bodyParser.json());
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 // https.createServer({
 //   cert: fs.readFileSync,
@@ -30,41 +37,53 @@ app.listen(PORT, () => {
   console.log(`Server started in PORT: ${PORT}`);
 });
 
-app.get("/", (req, res) => {
-  res.send("Hello world");
-});
-
 // GET all clients
-app.get("/clients", (req, res) => {
+app.get("/NutriNET/Cliente", (req, res) => {
   const sql = "SELECT * FROM client";
 
   connection.query(sql, (err, result) => {
-    if (err) throw err;
+    if (err) {
+      res.status(err.code || 500).json({
+        error: {
+          message: err.message,
+        },
+      });
+    }
     if (result.length > 0) {
       res.json(result);
     } else {
-      res.send("No clients");
+      res.send([]);
     }
   });
 });
 
 // GET client by ID
-app.get("/clients/:id", (req, res) => {
+app.get("/NutriNET/Cliente/:id", (req, res) => {
   const { id } = req.params;
   const sql = `SELECT * FROM client WHERE Cliente_ID = ${id}`;
 
   connection.query(sql, (err, result) => {
-    if (err) throw err;
+    if (err) {
+      res.status(err.code || 500).json({
+        error: {
+          message: err.message,
+        },
+      });
+    }
     if (result.length > 0) {
-      res.json(result);
+      res.json(result[0]);
     } else {
-      res.send("No client found");
+      res.status(404).json({
+        error: {
+          message: "Client Not Found",
+        },
+      });
     }
   });
 });
 
 // CREATE client
-app.post("/clients", (req, res) => {
+app.post("/NutriNET/Cliente", (req, res) => {
   const sql = "INSERT INTO client SET ?";
 
   const clientObj = {
@@ -79,8 +98,8 @@ app.post("/clients", (req, res) => {
     IMC: req.body.IMC,
     GEB: req.body.GEB,
     ETA: req.body.ETA,
-    Fecha_Creacion: req.body["Fecha_Creacion"],
-    Fecha_Actualizacion: req.body["Fecha_Actualizacion"],
+    Fecha_Creacion: moment().format("YYYY-MM-DD HH:mm:ss"),
+    Fecha_Actualizacion: null,
   };
 
   connection.query(sql, clientObj, (err) => {
@@ -90,10 +109,11 @@ app.post("/clients", (req, res) => {
 });
 
 // UPDATE client
-app.put("/clients/:id", (req, res) => {
+app.put("/NutriNET/Cliente/:id", (req, res) => {
   const { id } = req.params;
   const clientObj = req.body;
   const sql = `UPDATE client SET ? WHERE Cliente_ID = ${id}`;
+  clientObj.Fecha_Actualizacion = moment().format("YYYY-MM-DD HH:mm:ss");
 
   connection.query(sql, clientObj, (err) => {
     if (err) throw err;
@@ -102,12 +122,12 @@ app.put("/clients/:id", (req, res) => {
 });
 
 //DELETE client
-app.delete("/clients/:id", async (req, res) => {
-  const { id } = await req.params;
+app.delete("/NutriNET/Cliente/:id", (req, res) => {
+  const { id } = req.params;
   const sql = `DELETE FROM client WHERE Cliente_ID = ${id}`;
 
   connection.query(sql, (err) => {
     if (err) throw err;
-    res.send("Cliente eliminado");
+    res.send();
   });
 });
